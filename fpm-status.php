@@ -27,15 +27,13 @@ class FastCGIClient
     {
         if (str_starts_with($target, '/')) {
             // Unix socket
-            $this->socket = @stream_socket_client("unix://{
-            $target}", $errno, $errstr, 10);
+            $this->socket = @stream_socket_client("unix://{$target}", $errno, $errstr, 10);
         } else {
             // TCP socket (host:port)
             if (!str_contains($target, ':')) {
                 $target .= ':9000';
             }
-            $this->socket = @stream_socket_client("tcp://{
-            $target}", $errno, $errstr, 10);
+            $this->socket = @stream_socket_client("tcp://{$target}", $errno, $errstr, 10);
         }
         
         if (!$this->socket) {
@@ -65,8 +63,7 @@ class FastCGIClient
             'REQUEST_METHOD'    => 'GET',
             'SCRIPT_NAME'       => $statusPath,
             'SCRIPT_FILENAME'   => $statusPath,
-            'REQUEST_URI'       => $statusPath . ($query ? "?{
-            query}" : ''),
+            'REQUEST_URI'       => $statusPath . ($query ? "?{$query}" : ''),
             'QUERY_STRING'      => $query,
             'DOCUMENT_URI'      => $statusPath,
             'SERVER_SOFTWARE'   => 'php-fpm-status-parser',

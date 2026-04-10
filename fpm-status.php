@@ -862,6 +862,14 @@ HELP;
         };
     }
 
+    private function c(string $color): string
+    {
+        if ($this->options['no_color']) {
+            return '';
+        }
+        return self::COLORS[$color] ?? '';
+    }
+
     private function getStateColor(string $state): string
     {
         $c = fn($color) => $this->c($color);

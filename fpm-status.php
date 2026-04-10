@@ -617,7 +617,7 @@ HELP;
                 $this->formatDuration($proc['request duration'] ?? 0),
                 $proc['requests'] ?? 'N/A',
                 $proc['request method'] ?? '-',
-                $proc['request uri'] ?? '-',
+                $proc['request URI'] ?? '-',
             ];
         }
         

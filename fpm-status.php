@@ -27,17 +27,19 @@ class FastCGIClient
     {
         if (str_starts_with($target, '/')) {
             // Unix socket
-            $this->socket = @stream_socket_client("unix://{target}", $errno, $errstr, 10);
+            $this->socket = @stream_socket_client("unix://{
+            $target}", $errno, $errstr, 10);
         } else {
             // TCP socket (host:port)
             if (!str_contains($target, ':')) {
                 $target .= ':9000';
             }
-            $this->socket = @stream_socket_client("tcp://{$target}", $errno, $errstr, 10);
+            $this->socket = @stream_socket_client("tcp://{
+            $target}", $errno, $errstr, 10);
         }
         
         if (!$this->socket) {
-            throw new RuntimeException("Failed to connect to FastCGI: {$errstr} ({$errno})");
+            throw new RuntimeException("Failed to connect to FastCGI: {$errstr} ({$errno})");
         }
         
         stream_set_timeout($this->socket, 10);
@@ -63,7 +65,8 @@ class FastCGIClient
             'REQUEST_METHOD'    => 'GET',
             'SCRIPT_NAME'       => $statusPath,
             'SCRIPT_FILENAME'   => $statusPath,
-            'REQUEST_URI'       => $statusPath . ($query ? "?{$query}" : ''),
+            'REQUEST_URI'       => $statusPath . ($query ? "?{
+            query}" : ''),
             'QUERY_STRING'      => $query,
             'DOCUMENT_URI'      => $statusPath,
             'SERVER_SOFTWARE'   => 'php-fpm-status-parser',
@@ -150,7 +153,7 @@ class FastCGIClient
         }
         
         if ($stderr) {
-            throw new RuntimeException("FastCGI error: {$stderr}");
+            throw new RuntimeException("FastCGI error: {$stderr}");
         }
         
         // Strip HTTP headers from response
@@ -272,10 +275,10 @@ class PhpFpmStatusParser
     {
         $help = <<<'HELP'
 
-  ┌────────────────────────────────────────────────────────────────┐
+  ┌─────────────────────────────────────────────────────────────────┐
   │             PHP-FPM Status Parser v1.0                          │
   │         Monitor your PHP-FPM pools with style                   │
-  └────────────────────────────────────────────────────────────────┘
+  └─────────────────────────────────────────────────────────────────┘
 
   USAGE:
       php fpm-status.php [options] <target>
@@ -362,7 +365,7 @@ HELP;
         $content = @file_get_contents($url, false, $context);
         
         if ($content === false) {
-            throw new RuntimeException("Failed to fetch status page from: {$url}");
+            throw new RuntimeException("Failed to fetch status page from: {$url}");
         }
         
         return $content;
@@ -513,19 +516,11 @@ HELP;
         return $summary;
     }
 
-    private function c(string $color): string
-    {
-        if ($this->options['no_color']) {
-            return '';
-        }
-        return self::COLORS[$color] ?? '';
-    }
-
     public function displayPoolInfo(): void
     {
         $c = fn($color) => $this->c($color);
         
-        echo "\n{c('bold')}{c('bg_blue')}{c('white')} PHP-FPM Pool Status {c('reset')}\n\n";
+        echo "\n" . $c('bold') . $c('bg_blue') . $c('white') . " PHP-FPM Pool Status " . $c('reset') . "\n\n";
         
         $table = [
             ['Pool Name', $this->poolInfo['pool'] ?? 'N/A'],
@@ -536,8 +531,8 @@ HELP;
             ['Listen Queue', $this->poolInfo['listen queue'] ?? 'N/A'],
             ['Max Listen Queue', $this->poolInfo['max listen queue'] ?? 'N/A'],
             ['Listen Queue Length', $this->poolInfo['listen queue len'] ?? 'N/A'],
-            ['Idle Processes', "{c('green')}" . ($this->poolInfo['idle processes'] ?? 'N/A') . "{c('reset')}"] ,
-            ['Active Processes', "{c('yellow')}" . ($this->poolInfo['active processes'] ?? 'N/A') . "{c('reset')}"],
+            ['Idle Processes', $c('green') . ($this->poolInfo['idle processes'] ?? 'N/A') . $c('reset')],
+            ['Active Processes', $c('yellow') . ($this->poolInfo['active processes'] ?? 'N/A') . $c('reset')],
             ['Total Processes', $this->poolInfo['total processes'] ?? 'N/A'],
             ['Max Active Processes', $this->poolInfo['max active processes'] ?? 'N/A'],
             ['Max Children Reached', $this->colorizeMaxChildren($this->poolInfo['max children reached'] ?? 0)],
@@ -548,7 +543,7 @@ HELP;
         
         foreach ($table as $row) {
             $key = str_pad($row[0], $maxKeyLen);
-            echo "  {c('cyan')}{$key}{c('reset')} : {r{$row[1]}}\n";
+            echo "  " . $c('cyan') . $key . $c('reset') . " : " . $row[1] . "\n";
         }
     }
 
@@ -561,7 +556,7 @@ HELP;
             return;
         }
         
-        echo "\n{c('bold')}{c('bg_blue')}{c('white')} Scoreboard {c('reset')}\n\n";
+        echo "\n" . $c('bold') . $c('bg_blue') . $c('white') . " Scoreboard " . $c('reset') . "\n\n";
         
         // Display scoreboard with colors
         echo "  ";
@@ -570,10 +565,10 @@ HELP;
         foreach ($chars as $i => $char) {
             echo $this->colorizeScoreboardChar($char);
             if (($i + 1) % $charsPerLine === 0 && $i < count($chars) - 1) {
-                echo "{c('reset')}\n  ";
+                echo $c('reset') . "\n  ";
             }
         }
-        echo "{c('reset')}\n\n";
+        echo $c('reset') . "\n\n";
         
         // Legend with counts
         $counts = array_count_values(str_split($scoreboard));
@@ -588,7 +583,7 @@ HELP;
         echo "  ";
         foreach ($legend as $item) {
             if ($item[3] > 0) {
-                echo "{c($item[2])}■{c('reset')} {$item[0]}={$item[3]}  ";
+                echo $c($item[2]) . "■" . $c('reset') . " " . $item[0] . "=" . $item[3] . "  ";
             }
         }
         echo "\n";
@@ -600,21 +595,21 @@ HELP;
         $processes = $this->filterAndSortProcesses();
         
         if (empty($processes)) {
-            echo "\n{c('yellow')}No processes match the filter criteria.{c('reset')}\n";
-            echo "{c('dim')}Tip: Use status URL with '?full' for detailed process info.{c('reset')}\n";
+            echo "\n" . $c('yellow') . "No processes match the filter criteria." . $c('reset') . "\n";
+            echo $c('dim') . "Tip: Use status URL with '?full' for detailed process info." . $c('reset') . "\n";
             return;
         }
         
-        echo "\n{c('bold')}{c('bg_blue')}{c('white')} Process Details {c('reset')}";
+        echo "\n" . $c('bold') . $c('bg_blue') . $c('white') . " Process Details " . $c('reset');
         if ($this->options['state']) {
-            echo " {c('dim')}(filtered: {$this->options['state']}){c('reset')}";
+            echo " " . $c('dim') . "(filtered: " . $this->options['state'] . ")" . $c('reset');
         }
         if ($this->options['sort']) {
-            echo " {c('dim')}(sorted: {$this->options['sort']}){c('reset')}";
+            echo " " . $c('dim') . "(sorted: " . $this->options['sort'] . ")" . $c('reset');
         }
         echo "\n\n";
         
-        $headers = ['PID', 'State', 'Start', 'Duration', 'Reqs', 'Method', 'Script', 'URI'];
+        $headers = ['PID', 'State', 'Start', 'Duration', 'Reqs', 'Method', 'URI'];
         
         $rows = [];
         foreach ($processes as $proc) {
@@ -625,8 +620,7 @@ HELP;
                 $this->formatDuration($proc['request duration'] ?? 0),
                 $proc['requests'] ?? 'N/A',
                 $proc['request method'] ?? '-',
-                $this->truncate(basename($proc['script'] ?? '-'), 20),
-                $proc['request uri'] ?? $proc['request URI'] ?? '-',
+                $proc['request uri'] ?? '-',
             ];
         }
         
@@ -639,15 +633,15 @@ HELP;
         }
         
         // Header
-        echo "  {c('bold')}{c('cyan')}";
+        echo "  " . $c('bold') . $c('cyan');
         foreach ($headers as $i => $header) {
             echo str_pad($header, $widths[$i] + 2);
         }
-        echo "{c('reset')}\n  {c('dim')}";
+        echo $c('reset') . "\n  " . $c('dim');
         foreach ($widths as $w) {
             echo str_repeat('─', $w) . '  ';
         }
-        echo "{c('reset')}\n";
+        echo $c('reset') . "\n";
         
         // Rows
         foreach ($rows as $row) {
@@ -659,14 +653,14 @@ HELP;
             echo "\n";
         }
         
-        echo "\n  {c('bold')}Showing:{c('reset')} " . count($rows) . " process(es)\n";
+        echo "\n  " . $c('bold') . "Showing:" . $c('reset') . " " . count($rows) . " process(es)\n";
     }
 
     public function displaySummary(): void
     {
         $c = fn($color) => $this->c($color);
         
-        echo "\n{c('bold')}{c('bg_blue')}{c('white')} Summary {c('reset')}\n\n";
+        echo "\n" . $c('bold') . $c('bg_blue') . $c('white') . " Summary " . $c('reset') . "\n\n";
         
         $total = (int)($this->poolInfo['total processes'] ?? 0);
         $active = (int)($this->poolInfo['active processes'] ?? 0);
@@ -680,10 +674,10 @@ HELP;
             $activeBar = (int)(($active / $total) * $barWidth);
             $idleBar = $barWidth - $activeBar;
             
-            echo "  Utilization: [{$c('yellow')}" . str_repeat('█', $activeBar) .  
-                 "{$c('green')}" . str_repeat('█', $idleBar) . "{$c('reset')}]\n";
-            echo "               {$c('yellow')}Active: {$activePercent}%{$c('reset')} │ " .
-                 "{$c('green')}Idle: {$idlePercent}%{$c('reset')}\n";
+            echo "  Utilization: [" . $c('yellow') . str_repeat('█', $activeBar) . 
+                 $c('green') . str_repeat('█', $idleBar) . $c('reset') . "]\n";
+            echo "               " . $c('yellow') . "Active: " . $activePercent . "%" . $c('reset') . " │ " .
+                 $c('green') . "Idle: " . $idlePercent . "%" . $c('reset') . "\n";
         }
         
         if (!empty($this->processes)) {
@@ -710,21 +704,21 @@ HELP;
                 }
             }
             
-            echo "\n  {c('cyan')}Total Requests Served:{c('reset')}  {$totalRequests}\n";
-            echo "  {c('cyan')}Avg Requests/Process:{c('reset')}   {$avgRequests}\n";
+            echo "\n  " . $c('cyan') . "Total Requests Served:" . $c('reset') . "  " . $totalRequests . "\n";
+            echo "  " . $c('cyan') . "Avg Requests/Process:" . $c('reset') . "   " . $avgRequests . "\n";
             
             if ($maxDuration > 0) {
-                echo "  {c('cyan')}Longest Running:{c('reset')}        {$this->formatDuration($maxDuration)} ({$maxDurationScript})\n";
+                echo "  " . $c('cyan') . "Longest Running:" . $c('reset') . "        " . $this->formatDuration($maxDuration) . " (" . $maxDurationScript . ")\n";
             }
             
             if (!empty($scripts)) {
                 arsort($scripts);
-                echo "\n  {c('bold')}Top Scripts:{c('reset')}\n";
+                echo "\n  " . $c('bold') . "Top Scripts:" . $c('reset') . "\n";
                 $i = 0;
                 foreach ($scripts as $script => $count) {
                     if ($i++ >= 5) break;
                     $bar = str_repeat('▪', min($count, 20));
-                    echo "    {c('dim')}{$bar}{c('reset')} {$count}× {$script}\n";
+                    echo "    " . $c('dim') . $bar . $c('reset') . " " . $count . "× " . $script . "\n";
                 }
             }
         }
@@ -741,12 +735,12 @@ HELP;
         
         do {
             try {
-                if ($watch > 0) {
-                    echo "\033[2J\033[H"; // Clear screen
-                }
-                
+                // Fetch and parse data BEFORE clearing screen
                 $content = $this->fetch();
                 $this->parse($content);
+                
+                // Buffer the output
+                ob_start();
                 
                 if ($this->options['json']) {
                     $this->outputJson();
@@ -761,13 +755,28 @@ HELP;
                 
                 if ($watch > 0) {
                     $c = fn($color) => $this->c($color);
-                    echo "\n{c('dim')}Refreshing every {$watch}s. Press Ctrl+C to exit.{c('reset')}\n";
+                    echo "\n" . $c('dim') . "Refreshing every " . $watch . "s. Press Ctrl+C to exit." . $c('reset') . "\n";
+                }
+                
+                $output = ob_get_clean();
+                
+                // NOW clear screen and print buffered output (instant, no flicker)
+                if ($watch > 0) {
+                    echo "\033[2J\033[H"; // Clear screen and move cursor to top
+                }
+                
+                echo $output;
+                
+                if ($watch > 0) {
                     sleep($watch);
                 }
                 
             } catch (Exception $e) {
                 $c = fn($color) => $this->c($color);
-                echo "{c('red')}Error: {$e->getMessage()}{c('reset')}\n";
+                if ($watch > 0) {
+                    echo "\033[2J\033[H";
+                }
+                echo $c('red') . "Error: " . $e->getMessage() . $c('reset') . "\n";
                 if ($watch === 0) {
                     exit(1);
                 }
@@ -789,10 +798,10 @@ HELP;
         $secs = $seconds % 60;
         
         $parts = [];
-        if ($days > 0) $parts[] = "{$days}d";
-        if ($hours > 0) $parts[] = "{$hours}h";
-        if ($minutes > 0) $parts[] = "{$minutes}m";
-        $parts[] = "{$secs}s";
+        if ($days > 0) $parts[] = $days . "d";
+        if ($hours > 0) $parts[] = $hours . "h";
+        if ($minutes > 0) $parts[] = $minutes . "m";
+        $parts[] = $secs . "s";
         
         return implode(' ', $parts);
     }
@@ -803,7 +812,7 @@ HELP;
         if ($microseconds === 0) return '-';
         
         if ($microseconds < 1000) {
-            return "{$microseconds}μs";
+            return $microseconds . "μs";
         } elseif ($microseconds < 1000000) {
             return round($microseconds / 1000, 2) . "ms";
         } else {
@@ -830,25 +839,25 @@ HELP;
     {
         $c = fn($color) => $this->c($color);
         $value = (int)$value;
-        return $value > 0 ? "{c('red')}{$value} ⚠{c('reset')}" : "{c('green')}{$value}{c('reset')}";
+        return $value > 0 ? $c('red') . $value . " ⚠" . $c('reset') : $c('green') . $value . $c('reset');
     }
 
     private function colorizeSlow(int|string $value): string
     {
         $c = fn($color) => $this->c($color);
         $value = (int)$value;
-        return $value > 0 ? "{c('yellow')}{$value}{c('reset')}" : "{c('green')}{$value}{c('reset')}";
+        return $value > 0 ? $c('yellow') . $value . $c('reset') : $c('green') . $value . $c('reset');
     }
 
     private function colorizeScoreboardChar(string $char): string
     {
         $c = fn($color) => $this->c($color);
         return match ($char) {
-            '_', '.', 'I' => "{c('green')}{$char}",
-            'A' => "{c('yellow')}{$char}",
-            'R' => "{c('magenta')}{$char}",
-            'D' => "{c('blue')}{$char}",
-            'K', 'C' => "{c('red')}{$char}",
+            '_', '.', 'I' => $c('green') . $char,
+            'A' => $c('yellow') . $char,
+            'R' => $c('magenta') . $char,
+            'D' => $c('blue') . $char,
+            'K', 'C' => $c('red') . $char,
             default => $char,
         };
     }

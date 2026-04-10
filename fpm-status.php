@@ -609,7 +609,7 @@ HELP;
         }
         echo "\n\n";
         
-        $headers = ['PID', 'State', 'Start', 'Duration', 'Reqs', 'Method', 'URI', 'Script'];
+        $headers = ['PID', 'State', 'Start', 'Duration', 'Reqs', 'Method', 'URI'];
         
         $rows = [];
         foreach ($processes as $proc) {
@@ -620,8 +620,7 @@ HELP;
                 $this->formatDuration($proc['request duration'] ?? 0),
                 $proc['requests'] ?? 'N/A',
                 $proc['request method'] ?? '-',
-                $this->truncate($proc['request uri'] ?? '-', 25),
-                $this->truncate(basename($proc['script'] ?? '-'), 20),
+                $proc['request uri'] ?? '-',
             ];
         }
         
